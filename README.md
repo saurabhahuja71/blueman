@@ -64,8 +64,13 @@ The built RPMs are published as an **unsigned** dnf repository on GitHub Pages,
 so `dnf upgrade` picks up new builds automatically:
 
 ```sh
-sudo curl -fsSL -o /etc/yum.repos.d/blueman-ol.repo \
-  https://raw.githubusercontent.com/saurabhahuja71/blueman/main/packaging/blueman-ol.repo
+# OL10 ships dnf5:
+sudo dnf config-manager addrepo --from-repofile=https://saurabhahuja71.github.io/blueman/blueman-ol.repo
+
+# OL8/OL9 ship dnf4:
+sudo dnf install -y dnf-plugins-core
+sudo yum-config-manager --add-repo=https://saurabhahuja71.github.io/blueman/blueman-ol.repo
+
 sudo dnf install -y blueman
 ```
 
