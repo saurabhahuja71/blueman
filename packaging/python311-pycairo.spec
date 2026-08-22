@@ -19,6 +19,13 @@ Requires:       python3.11
 Python 3.11 bindings for the cairo graphics library, built for Oracle Linux
 releases whose default interpreter is older than the one required by blueman.
 
+%package devel
+Summary: Development files for python311-pycairo
+Requires: %{name} = %{version}-%{release}
+
+%description devel
+Header and pkg-config file for building software against python311-pycairo.
+
 %prep
 %autosetup -n pycairo-%{version}
 
@@ -35,6 +42,9 @@ find %{buildroot} -name '__pycache__' -type d -exec rm -rf {} +
 %doc NEWS README.rst
 %{_prefix}/lib*/python3.11/site-packages/cairo/
 %{_prefix}/lib*/python3.11/site-packages/pycairo-*.egg-info
-# shipped here (not in -devel) so python311-pygobject can build against this rpm
+
+# kept in -devel (not the main package) so the main package never collides
+# with the distro's python3-cairo-devel on machines where both are installed
+%files devel
 %{_includedir}/pycairo/
 %{_libdir}/pkgconfig/py3cairo.pc

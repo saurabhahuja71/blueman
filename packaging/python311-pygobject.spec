@@ -26,6 +26,14 @@ PyGObject provides Python 3.11 bindings for GObject-based libraries such as
 GTK, built for Oracle Linux releases whose stock bindings target an older
 interpreter than required by blueman.
 
+%package devel
+Summary: Development files for python311-pygobject
+Requires: %{name} = %{version}-%{release}
+Requires: python311-pycairo-devel
+
+%description devel
+Headers and pkg-config file for building software against python311-pygobject.
+
 %prep
 %autosetup -n pygobject-%{version}
 
@@ -45,6 +53,9 @@ find %{buildroot} -name '*.la' -delete
 # brp-bytecompile after the install step, so the whole tree must be packaged
 %{_prefix}/lib*/python3.11/site-packages/pygtkcompat/
 %{_prefix}/lib*/python3.11/site-packages/PyGObject-*.egg-info
-# shipped here so downstream builds (blueman) can use the headers/pc file
+
+# kept in -devel (not the main package) so the main package never collides
+# with the distro's python3-gobject-devel on machines where both are installed
+%files devel
 %{_includedir}/pygobject-3.0/
 %{_libdir}/pkgconfig/pygobject-3.0.pc
