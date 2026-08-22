@@ -1,0 +1,7 @@
+[blueman]
+name=Blueman for Oracle Linux $releasever ($basearch)
+baseurl=https://saurabhahuja71.github.io/blueman/el$releasever/$basearch/
+enabled=1
+metadata_expire=600
+gpgcheck=0
+repo_gpgcheck=0
