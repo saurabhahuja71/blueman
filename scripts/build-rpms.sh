@@ -6,6 +6,9 @@ set -euxo pipefail
 OL="${1:?usage: build-rpms.sh <ol-major> [out-dir]}"
 OUT="${2:-dist}"
 
+# workspace is owned by another uid inside CI containers
+git config --global --add safe.directory '*' 2>/dev/null || true
+
 PYCAIRO_VERSION="${PYCAIRO_VERSION:-1.23.0}"
 PYGOBJECT_VERSION="${PYGOBJECT_VERSION:-3.44.1}"
 
