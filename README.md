@@ -65,11 +65,11 @@ so `dnf upgrade` picks up new builds automatically:
 
 ```sh
 # OL10 ships dnf5:
-sudo dnf config-manager addrepo --from-repofile=https://saurabhahuja71.github.io/blueman/blueman-ol.repo
+sudo dnf config-manager addrepo --from-repofile=https://saurabhahuja71.github.io/blueman/blueman.repo
 
 # OL8/OL9 ship dnf4:
 sudo dnf install -y dnf-plugins-core
-sudo yum-config-manager --add-repo=https://saurabhahuja71.github.io/blueman/blueman-ol.repo
+sudo yum-config-manager --add-repo=https://saurabhahuja71.github.io/blueman/blueman.repo
 
 sudo dnf install -y blueman
 ```
@@ -96,7 +96,7 @@ RPMs from the same release; they are hard requirements of the blueman package.
 | `scripts/build-rpms.sh` | Shared build logic used inside each container |
 | `packaging/blueman.spec` | RPM spec for blueman (built from this fork's source) |
 | `packaging/python311-py*.spec` | Companion specs for python3.11 bindings on OL8/OL9 |
-| `packaging/blueman-ol.repo` | dnf repo definition served to users |
+| `packaging/blueman.repo` | dnf repo definition served to users |
 
 To cut a release: bump `Version:` in `configure.ac` (and `meson.build`), then
 

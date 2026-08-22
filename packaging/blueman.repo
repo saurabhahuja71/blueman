@@ -1,4 +1,4 @@
-[blueman-ol]
+[blueman]
 name=Blueman for Oracle Linux $releasever ($basearch)
 baseurl=https://saurabhahuja71.github.io/blueman/el$releasever/$basearch/
 enabled=1

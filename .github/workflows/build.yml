@@ -80,7 +80,7 @@ jobs:
           find pages -type f -name '*.rpm' | xargs -n1 dirname | sort -u | while read -r dir; do
             createrepo_c "$dir"
           done
-          cp packaging/blueman-ol.repo pages/
+          cp packaging/blueman.repo pages/
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
