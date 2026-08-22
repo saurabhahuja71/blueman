@@ -45,3 +45,56 @@ Translations are managed on Hosted Weblate.
 ## License
 
 All parts of the software are licensed under GPLv3 (or GPLv2) and allow redistribution under any later version.
+
+## Oracle Linux RPM packages (this fork)
+
+This fork is packaged for **Oracle Linux 8, 9 and 10** by GitHub Actions
+([`.github/workflows/build.yml`](.github/workflows/build.yml)). Every push to
+`main` rebuilds the RPMs from source; pushing a `v*` tag additionally attaches
+all RPMs to a GitHub Release.
+
+Because this fork requires Python >= 3.11 while OL8/OL9 only ship PyGObject
+bindings for their default interpreters, the CI also builds companion packages
+(`python311-pycairo`, `python311-pygobject`) and the blueman RPM on those
+releases targets `/usr/bin/python3.11`.
+
+### Install via the dnf repository (recommended)
+
+The built RPMs are published as an **unsigned** dnf repository on GitHub Pages,
+so `dnf upgrade` picks up new builds automatically:
+
+```sh
+sudo curl -fsSL -o /etc/yum.repos.d/blueman-ol.repo \
+  https://raw.githubusercontent.com/saurabhahuja71/blueman/main/packaging/blueman-ol.repo
+sudo dnf install -y blueman
+```
+
+Since the repository is unsigned it ships with `gpgcheck=0`.
+
+### Install from Releases
+
+Download the RPMs matching your release from the
+[Releases](../../releases) page and install them together:
+
+```sh
+sudo dnf install -y ./blueman-*.el9.*.rpm ./python311-*.rpm   # OL9 example
+```
+
+On OL8/OL9 install the matching `python311-pycairo` / `python311-pygobject`
+RPMs from the same release; they are hard requirements of the blueman package.
+
+### CI layout
+
+| Path | Purpose |
+| --- | --- |
+| `.github/workflows/build.yml` | Matrix build for OL8/OL9/OL10 in official Oracle Linux containers |
+| `scripts/build-rpms.sh` | Shared build logic used inside each container |
+| `packaging/blueman.spec` | RPM spec for blueman (built from this fork's source) |
+| `packaging/python311-py*.spec` | Companion specs for python3.11 bindings on OL8/OL9 |
+| `packaging/blueman-ol.repo` | dnf repo definition served to users |
+
+To cut a release: bump `Version:` in `configure.ac` (and `meson.build`), then
+
+```sh
+git tag v<version> && git push origin v<version>
+```

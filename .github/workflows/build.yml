@@ -1,0 +1,89 @@
+name: Build RPMs & Publish
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: OL${{ matrix.ol }} RPM build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ol: [8, 9, 10]
+    container:
+      image: oraclelinux:${{ matrix.ol }}
+    steps:
+      - name: Install git (needed before checkout)
+        run: dnf install -y git-core
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build RPMs
+        run: bash scripts/build-rpms.sh "${{ matrix.ol }}" dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rpm-el${{ matrix.ol }}
+          path: dist/**
+          if-no-files-found: error
+
+  release:
+    name: Attach RPMs to GitHub release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: dist
+
+      - name: Create release and upload RPMs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          shopt -s globstar nullglob
+          rpms=(dist/**/*.rpm)
+          gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1 || \
+            gh release create "${GITHUB_REF_NAME}" --title "${GITHUB_REF_NAME}" --generate-notes
+          gh release upload "${GITHUB_REF_NAME}" "${rpms[@]}" --clobber
+
+  repo:
+    name: Publish unsigned dnf repository
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: dist
+
+      - name: Build repository metadata
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq createrepo-c
+          mkdir -p pages
+          cp -a dist/el* pages/
+          cp -a dist/srpm pages/srpms
+          find pages -type f -name '*.rpm' | xargs -n1 dirname | sort -u | while read -r dir; do
+            createrepo_c "$dir"
+          done
+          cp packaging/blueman-ol.repo pages/
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./pages
+          force_orphan: true
